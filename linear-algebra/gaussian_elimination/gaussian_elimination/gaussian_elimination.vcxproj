@@ -139,12 +139,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="gauss.cpp" />
+    <ClCompile Include="elimination.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="read_matrix.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="gauss.h" />
+    <ClInclude Include="elimination.h" />
     <ClInclude Include="read_matrix.h" />
   </ItemGroup>
   <ItemGroup>

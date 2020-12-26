@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 #include "read_matrix.h"
-#include "gauss.h"
+#include "elimination.h"
 
 int main() {
 

@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <io.h>
 #include <math.h>
+
 #include "read_matrix.h"
 
 double** allocate_matrix(size_t height, size_t width) {
