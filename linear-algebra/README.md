@@ -1,7 +1,4 @@
-# numerical-methods
-Repository for numerical methods of linear algebra (3d term) and calculus (4th term).
-
-Implemented methods of linear algebra:
+# Linear algebra numerical methods
 1. [Gaussian elimination (only division)]()
 2. [Gaussian elimination (pivot element + determinant calculating + inverse matrix calculating)]()
 3. [Cholesky decomposition + tridiagonal matrix algorithm]()
