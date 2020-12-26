@@ -1,7 +1,7 @@
 # Linear algebra numerical methods
-1. [Gaussian elimination (only division)]()
-2. [Gaussian elimination (pivot element + determinant calculating + inverse matrix calculating)]()
-3. [Cholesky decomposition + tridiagonal matrix algorithm]()
+1. [Gaussian elimination (only division)](./gaussian_elimination/gaussian_elimination)
+2. Gaussian elimination ([pivot element](./pivot_determinant_inverse/gaussian_elimination_pivot/gaussian_elimination_pivot) + [determinant calculating](./pivot_determinant_inverse/gaussian_elimination_determinant/gaussian_elimination_determinant/) + [inverse matrix calculating](./pivot_determinant_inverse/gaussian_elimination_inverse/gaussian_elimination_inverse/))
+3. [Cholesky decomposition](./cholesky_tridiagonal/cholesky_decomposition/cholesky_decomposition/) + [tridiagonal matrix algorithm](./cholesky_tridiagonal/tridiagonal_matrix_algorithm/tridiagonal_matrix_algorithm/)
 4. [Rotations method + Householder reflections method]()
 5. [Gauss–Seidel method]()
 6. [Successive over-relaxation]()
