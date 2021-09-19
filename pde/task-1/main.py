@@ -108,8 +108,9 @@ def solve(t_max, tau, x_max, h, a):
     print("\nMax deviation:", find_max_dev(u, u_ex))
 
 
+# TODO: save exact function values to csv and just load it
 start_time = time.time()
-solve(1, 1 / 50000, 1, 1 / 50000, 0.027)
+solve(1, 1 / 5000, 1, 1 / 5000, 0.027)
 end_time = time.time()
 
 print("Elapsed seconds:", (end_time - start_time))
