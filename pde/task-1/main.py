@@ -26,13 +26,7 @@ def u_exact(t, x):
 
 
 def u_table_exact(t_grid, x_grid):
-    result = []
-    with Bar('Calculating exact function on grid:', max=(len(t_grid))) as bar:
-        for i in range(len(t_grid)):
-            result.append(np.array([u_exact(t_grid[i], x) for x in x_grid]))
-            bar.next()
-
-    return result
+    return u_exact(t_grid[:, None], x_grid[None, :])
 
 
 def find_max_dev(u, u_ex):
@@ -54,28 +48,22 @@ def solve(t_max, tau, x_max, h, a):
 
     u = np.zeros((M, N))
 
-    with Bar('Setting initial values:', max=N + 2 * M) as bar:
-        for i in range(N):
-            u[0][i] = mu(x_grid[i])
-            bar.next()
+    u[0] = mu(x_grid[None, :])
+    u[:, 0] = mu_1(t_grid[None, :])
+    u[:, N-1] = mu_2(t_grid[None, :])
 
-        for i in range(M):
-            u[i][0] = mu_1(t_grid[i])
-            bar.next()
-
-        for i in range(M):
-            u[i][N - 1] = mu_2(t_grid[i])
-            bar.next()
+    for i in range(M):
+        u[i][N - 1] = mu_2(t_grid[i])
 
     matrix = np.zeros((M - 2, N - 2))
     b = np.zeros(M - 2)
 
-    matrix[0][0] = p + 2 * d
+    np.fill_diagonal(matrix, [p + 2*d] * (N - 2))
+
     matrix[0][1] = -d
 
     for i in range(1, N - 3):
         matrix[i][i - 1] = -d
-        matrix[i][i] = p + 2 * d
         matrix[i][i + 1] = -d
 
     matrix[N - 3][N - 4] = -d
@@ -98,10 +86,7 @@ def solve(t_max, tau, x_max, h, a):
 
             b[N - 3] = u[s][N - 2] * p + d * u[s + 1][N - 1] + f(x_grid[N - 2], t_grid[s + 1])
 
-            vec = linalg.solve_banded((1, 1), matrix_prep, b)
-
-            for k in range(1, N - 1):
-                u[s + 1][k] = vec[k - 1]
+            u[s+1][1:N-1] = linalg.solve_banded((1, 1), matrix_prep, b)
 
             bar.next()
 
@@ -110,7 +95,7 @@ def solve(t_max, tau, x_max, h, a):
 
 # TODO: save exact function values to csv and just load it
 start_time = time.time()
-solve(1, 1 / 5000, 1, 1 / 5000, 0.027)
+solve(1, 1 / 10000, 1, 1 / 10000, 0.027)
 end_time = time.time()
 
 print("Elapsed seconds:", (end_time - start_time))
