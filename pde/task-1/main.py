@@ -55,7 +55,7 @@ def solve(t_min, t_max, tau, x_min, x_max, h, a, f, mu, mu_1, mu_2):
     return u
 
 
-CASE_TO_SOLVE = CASE_10
+CASE_TO_SOLVE = CASE_8
 
 u_exact = CASE_TO_SOLVE['u_exact']
 tau = CASE_TO_SOLVE['kwargs']['tau']
@@ -84,9 +84,9 @@ t = np.linspace(t_min, t_max, int((t_max - t_min) / tau))
 X, T = np.meshgrid(x, t)
 U = u_exact(X, T)
 
-fig = plt.figure()
-fig1 = plt.figure()
-fig2 = plt.figure()
+fig = plt.figure(figsize=(16, 12), dpi=200)
+fig1 = plt.figure(figsize=(16, 12), dpi=200)
+fig2 = plt.figure(figsize=(16, 12), dpi=200)
 
 ax_ex = fig.add_subplot(projection='3d')
 ax_c = fig1.add_subplot(projection='3d')
@@ -110,5 +110,8 @@ ax_all.set_ylabel('t')
 ax_all.set_zlabel('u')
 ax_all.plot_surface(X, T, U, cmap='viridis')
 ax_all.plot_surface(X, T, u, cmap='plasma')
+
+plt.xticks([0, 0.5, 1])
+plt.yticks(np.linspace(0, 1, 11))
 
 plt.show()
