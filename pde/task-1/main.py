@@ -8,10 +8,6 @@ from scipy import linalg
 from tasks_configs import *
 
 
-# def u_exact(x, t):
-#     return -x ** 4 + x + t * x + t ** 2 - t * np.exp(x)
-
-
 def find_max_dev(u, u_ex):
     arr = np.subtract(u, u_ex)
     return max(abs(np.min(arr)), abs(np.max(arr)))
@@ -59,28 +55,19 @@ def solve(t_min, t_max, tau, x_min, x_max, h, a, f, mu, mu_1, mu_2):
     return u
 
 
-CASE_TO_SOLVE = CASE_12
+CASE_TO_SOLVE = CASE_10
 
-u_exact = lambda x, t: -x ** 4 + x + t * x + t ** 2 - t * np.exp(x)
-a = 0.027
-tau = 1 / 10000
-h = 1 / 10000
-t_min, t_max = [0, 1]
-x_min, x_max = [0, 1]
+u_exact = CASE_TO_SOLVE['u_exact']
+tau = CASE_TO_SOLVE['kwargs']['tau']
+h = CASE_TO_SOLVE['kwargs']['h']
+x_min = CASE_TO_SOLVE['kwargs']['x_min']
+x_max = CASE_TO_SOLVE['kwargs']['x_max']
+t_min = CASE_TO_SOLVE['kwargs']['t_min']
+t_max = CASE_TO_SOLVE['kwargs']['t_max']
 
 start_time = time.time()
 
-u = solve(t_min=t_min,
-          t_max=t_max,
-          tau=tau,
-          x_min=x_min,
-          x_max=x_max,
-          h=h,
-          a=a,
-          f=lambda x, t: x + 2 * t - np.exp(x) - a * (-12 * (x ** 2) - t * np.exp(x)),
-          mu=lambda x: -x ** 4 + x,
-          mu_1=lambda t: t ** 2 - t,
-          mu_2=lambda t: t ** 2 + t - np.e * t)
+u = solve(**CASE_TO_SOLVE['kwargs'])
 
 end_time = time.time()
 
