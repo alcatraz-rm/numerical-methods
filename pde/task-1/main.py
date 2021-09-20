@@ -1,32 +1,15 @@
 import time
 
 import numpy as np
+from matplotlib import pyplot as plt
 from progress.bar import Bar
 from scipy import linalg
 
-
-def f(x, t):
-    return x + 2 * t - np.exp(x) - 0.027 * (-12 * (x ** 2) - t * np.exp(x))
+from tasks_configs import *
 
 
-def mu(x):
-    return -x ** 4 + x
-
-
-def mu_1(t):
-    return t ** 2 - t
-
-
-def mu_2(t):
-    return t ** 2 + t - np.e * t
-
-
-def u_exact(t, x):
-    return -x ** 4 + x + t * x + t ** 2 - t * np.exp(x)
-
-
-def u_table_exact(t_grid, x_grid):
-    return u_exact(t_grid[:, None], x_grid[None, :])
+# def u_exact(x, t):
+#     return -x ** 4 + x + t * x + t ** 2 - t * np.exp(x)
 
 
 def find_max_dev(u, u_ex):
@@ -34,68 +17,111 @@ def find_max_dev(u, u_ex):
     return max(abs(np.min(arr)), abs(np.max(arr)))
 
 
-def solve(t_max, tau, x_max, h, a):
+def solve(t_min, t_max, tau, x_min, x_max, h, a, f, mu, mu_1, mu_2):
     d = a / (h * h)
     p = 1 / tau
 
-    M = int(t_max / tau)
-    N = int(x_max / h)
+    M = int((t_max - t_min) / tau)
+    N = int((x_max - x_min) / h)
 
-    x_grid = np.array([i * tau for i in range(N)])
-    t_grid = np.array([i * h for i in range(M)])
-
-    u_ex = u_table_exact(t_grid, x_grid)
+    x_grid = np.arange(x_min, x_max, h)
+    t_grid = np.arange(t_min, t_max, tau)
+    xx, tt = np.meshgrid(x_grid, t_grid, sparse=True)
 
     u = np.zeros((M, N))
 
-    u[0] = mu(x_grid[None, :])
+    u[0] = mu(xx)
     u[:, 0] = mu_1(t_grid[None, :])
-    u[:, N-1] = mu_2(t_grid[None, :])
+    u[:, N - 1] = mu_2(t_grid[None, :])
 
-    for i in range(M):
-        u[i][N - 1] = mu_2(t_grid[i])
-
-    matrix = np.zeros((M - 2, N - 2))
     b = np.zeros(M - 2)
-
-    np.fill_diagonal(matrix, [p + 2*d] * (N - 2))
-
-    matrix[0][1] = -d
-
-    for i in range(1, N - 3):
-        matrix[i][i - 1] = -d
-        matrix[i][i + 1] = -d
-
-    matrix[N - 3][N - 4] = -d
-    matrix[N - 3][N - 3] = p + 2 * d
-
     matrix_prep = np.zeros((3, N - 2))
 
+    # TODO: remove loops here
     for i in range(M - 2):
         for j in range(N - 2):
-            index = 1 + i - j
-            if 0 <= index < 3:
-                matrix_prep[index][j] = matrix[i][j]
+            if abs(i - j) == 1:
+                matrix_prep[1 + i - j][j] = -d
+            elif j == i:
+                matrix_prep[1 + i - j][j] = p + 2 * d
 
-    with Bar('Solving (time layer):', max=M-1) as bar:
+    with Bar('Solving (time layer):', max=M - 1) as bar:
         for s in range(M - 1):
             b[0] = u[s][1] * p + d * u[s + 1][0] + f(x_grid[1], t_grid[s + 1])
-
             for i in range(1, N - 3):
                 b[i] = u[s][i + 1] * p + f(x_grid[i + 1], t_grid[s + 1])
-
             b[N - 3] = u[s][N - 2] * p + d * u[s + 1][N - 1] + f(x_grid[N - 2], t_grid[s + 1])
 
-            u[s+1][1:N-1] = linalg.solve_banded((1, 1), matrix_prep, b)
+            u[s + 1][1:N - 1] = linalg.solve_banded((1, 1), matrix_prep, b)
 
             bar.next()
 
-    print("\nMax deviation:", find_max_dev(u, u_ex))
+    return u
 
 
-# TODO: save exact function values to csv and just load it
+CASE_TO_SOLVE = CASE_12
+
+u_exact = lambda x, t: -x ** 4 + x + t * x + t ** 2 - t * np.exp(x)
+a = 0.027
+tau = 1 / 10000
+h = 1 / 10000
+t_min, t_max = [0, 1]
+x_min, x_max = [0, 1]
+
 start_time = time.time()
-solve(1, 1 / 10000, 1, 1 / 10000, 0.027)
+
+u = solve(t_min=t_min,
+          t_max=t_max,
+          tau=tau,
+          x_min=x_min,
+          x_max=x_max,
+          h=h,
+          a=a,
+          f=lambda x, t: x + 2 * t - np.exp(x) - a * (-12 * (x ** 2) - t * np.exp(x)),
+          mu=lambda x: -x ** 4 + x,
+          mu_1=lambda t: t ** 2 - t,
+          mu_2=lambda t: t ** 2 + t - np.e * t)
+
 end_time = time.time()
 
+xx, tt = np.meshgrid(np.arange(x_min, x_max, h), np.arange(t_min, t_max, tau), sparse=True)
+u_ex = u_exact(xx, tt)
+print("\nMax deviation:", find_max_dev(u, u_ex))
+
 print("Elapsed seconds:", (end_time - start_time))
+
+# graph logic
+x = np.linspace(x_min, x_max, int((x_max - x_min) / h))
+t = np.linspace(t_min, t_max, int((t_max - t_min) / tau))
+
+X, T = np.meshgrid(x, t)
+U = u_exact(X, T)
+
+fig = plt.figure()
+fig1 = plt.figure()
+fig2 = plt.figure()
+
+ax_ex = fig.add_subplot(projection='3d')
+ax_c = fig1.add_subplot(projection='3d')
+ax_all = fig2.add_subplot(projection='3d')
+
+ax_ex.set_title('Exact solution')
+ax_ex.set_xlabel('x')
+ax_ex.set_ylabel('t')
+ax_ex.set_zlabel('u')
+ax_ex.plot_surface(X, T, U, cmap='viridis')
+
+ax_c.set_title('Calculated solution')
+ax_c.set_xlabel('x')
+ax_c.set_ylabel('t')
+ax_c.set_zlabel('u')
+ax_c.plot_surface(X, T, u, cmap='plasma')
+
+ax_all.set_title('Both solutions')
+ax_all.set_xlabel('x')
+ax_all.set_ylabel('t')
+ax_all.set_zlabel('u')
+ax_all.plot_surface(X, T, U, cmap='viridis')
+ax_all.plot_surface(X, T, u, cmap='plasma')
+
+plt.show()
