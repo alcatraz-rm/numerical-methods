@@ -4,7 +4,7 @@
 
 Here is the [implicit scheme for the one-dimensional heat equation](https://people.sc.fsu.edu/~jpeterson/4-Implicit.pdf)
 
-Input values are: `tau` (step by time axe) and `h` (step by x axe)
+Input values are: `tau` (step by t-axis) and `h` (step by x-axis)
 
 I didn't test it for `tau < 0.0001` and `h < 0.0001`, it takes a lot of time
 
