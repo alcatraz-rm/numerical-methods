@@ -2,7 +2,7 @@ import time
 from datetime import timedelta
 
 from matplotlib import pyplot as plt
-from progress.bar import Bar
+from progress.bar import ChargingBar
 from scipy import linalg
 
 from tasks_configs import *
@@ -41,7 +41,7 @@ def solve(t_min, t_max, tau, x_min, x_max, h, a, f, mu, mu_1, mu_2):
             elif j == i:
                 matrix_prep[1 + i - j][j] = p + 2 * d
 
-    with Bar('Solving (time layer):', max=M - 1) as bar:
+    with ChargingBar('Solving (time layer):', max=M - 1) as bar:
         for s in range(M - 1):
             b[0] = u[s][1] * p + d * u[s + 1][0] + f(x_grid[1], t_grid[s + 1])
             for i in range(1, N - 3):
