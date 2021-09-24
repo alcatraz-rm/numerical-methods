@@ -30,11 +30,11 @@ def solve(t_min, t_max, tau, x_min, x_max, h, a, f, mu, mu_1, mu_2):
     u[:, 0] = mu_1(t_grid[None, :])
     u[:, N - 1] = mu_2(t_grid[None, :])
 
-    b = np.zeros(M - 2)
+    b = np.zeros(N - 2)
     matrix_prep = np.zeros((3, N - 2))
 
     # TODO: remove loops here
-    for i in range(M - 2):
+    for i in range(N - 2):
         for j in range(N - 2):
             if abs(i - j) == 1:
                 matrix_prep[1 + i - j][j] = -d
@@ -59,8 +59,8 @@ CASE_TO_SOLVE = CASE_12
 CASE_TO_SOLVE['kwargs']['tau'] = float(input('tau (use decimal repr): '))
 CASE_TO_SOLVE['kwargs']['h'] = float(input('h (use decimal repr): '))
 
-assert CASE_TO_SOLVE['kwargs']['tau'] <= 1/3, 'tau must be less than 1/3'
-assert CASE_TO_SOLVE['kwargs']['h'] <= 1/3, 'h must be less than 1/3'
+assert CASE_TO_SOLVE['kwargs']['tau'] <= 1 / 3, 'tau must be less than 1/3'
+assert CASE_TO_SOLVE['kwargs']['h'] <= 1 / 3, 'h must be less than 1/3'
 
 u_exact = CASE_TO_SOLVE['u_exact']
 tau = CASE_TO_SOLVE['kwargs']['tau']
@@ -79,7 +79,9 @@ end_time = time.time()
 xx, tt = np.meshgrid(np.arange(x_min, x_max, h), np.arange(t_min, t_max, tau), sparse=True)
 u_ex = u_exact(xx, tt)
 
-print("\nDeviation:", find_max_dev(u, u_ex))
+err = find_max_dev(u, u_ex)
+print("\nMax error:", err)
+print(f"tau + h^2 = {tau + h ** 2}")
 print("Elapsed time:", timedelta(seconds=end_time - start_time))
 
 # graph logic
