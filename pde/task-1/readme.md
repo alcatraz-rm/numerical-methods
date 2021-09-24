@@ -12,7 +12,7 @@ For `tau=0.0001` and `h=0.0001` it takes ~200 seconds
 
 ## Demo
 
-Demo-equation:
+One-dimensional heat equation:
 
 ![](./demo-eq.png)
 
