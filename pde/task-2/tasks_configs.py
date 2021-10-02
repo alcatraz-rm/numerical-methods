@@ -4,8 +4,6 @@ CASE_3 = {
     'u_exact': lambda x, t: cos(pi * x) - sin(2 * pi * t) / 2 + 2 * pi * x - 3.5 * t,
     'kwargs': {
         'a': 0.41,
-        'tau': 1 / 10000,
-        'h': 1 / 10000,
         't_min': 0,
         't_max': 1,
         'x_min': 0,
