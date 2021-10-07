@@ -42,6 +42,9 @@ CASE_TO_SOLVE = CASE_3
 CASE_TO_SOLVE['kwargs']['tau'] = float(input('tau (use decimal repr): '))
 CASE_TO_SOLVE['kwargs']['h'] = float(input('h (use decimal repr): '))
 
+assert CASE_TO_SOLVE['kwargs']['a'] * CASE_TO_SOLVE['kwargs']['tau'] / CASE_TO_SOLVE['kwargs'][
+    'h'] <= 1, "method doesn't converge"
+
 assert CASE_TO_SOLVE['kwargs']['tau'] <= 1 / 3, 'tau must be less than 1/3'
 assert CASE_TO_SOLVE['kwargs']['h'] <= 1 / 3, 'h must be less than 1/3'
 
