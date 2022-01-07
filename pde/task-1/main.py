@@ -17,11 +17,11 @@ def solve(t_min, t_max, tau, x_min, x_max, h, a, f, mu, mu_1, mu_2):
     d = a / (h * h)
     p = 1 / tau
 
-    M = int((t_max - t_min) / tau)
-    N = int((x_max - x_min) / h)
+    M = int((t_max - t_min) / tau) + 1
+    N = int((x_max - x_min) / h) + 1
 
-    x_grid = np.arange(x_min, x_max, h)
-    t_grid = np.arange(t_min, t_max, tau)
+    x_grid = np.arange(x_min, x_max + h, h)
+    t_grid = np.arange(t_min, t_max + tau, tau)
     xx, tt = np.meshgrid(x_grid, t_grid, sparse=True)
 
     u = np.zeros((M, N))
@@ -33,7 +33,6 @@ def solve(t_min, t_max, tau, x_min, x_max, h, a, f, mu, mu_1, mu_2):
     b = np.zeros(N - 2)
     matrix_prep = np.zeros((3, N - 2))
 
-    # TODO: remove loops here
     for i in range(N - 2):
         for j in range(N - 2):
             if abs(i - j) == 1:
@@ -76,7 +75,7 @@ u = solve(**CASE_TO_SOLVE['kwargs'])
 
 end_time = time.time()
 
-xx, tt = np.meshgrid(np.arange(x_min, x_max, h), np.arange(t_min, t_max, tau), sparse=True)
+xx, tt = np.meshgrid(np.arange(x_min, x_max + h, h), np.arange(t_min, t_max + tau, tau), sparse=True)
 u_ex = u_exact(xx, tt)
 
 err = find_max_dev(u, u_ex)
@@ -85,11 +84,11 @@ print(f"tau + h^2 = {tau + h ** 2}")
 print("Elapsed time:", timedelta(seconds=end_time - start_time))
 
 # graph logic
-x = np.linspace(x_min, x_max, int((x_max - x_min) / h))
-x_ex = np.linspace(x_min, x_max, 10000)
+x = np.linspace(x_min, x_max, int((x_max - x_min) / h) + 1)
+x_ex = np.linspace(x_min, x_max, 10001)
 
-t = np.linspace(t_min, t_max, int((t_max - t_min) / tau))
-t_ex = np.linspace(t_min, t_max, 10000)
+t = np.linspace(t_min, t_max, int((t_max - t_min) / tau) + 1)
+t_ex = np.linspace(t_min, t_max, 10001)
 
 X, T = np.meshgrid(x, t)
 X_ex, T_ex = np.meshgrid(x_ex, t_ex)
