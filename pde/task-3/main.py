@@ -24,6 +24,7 @@ def solve(x_min, x_max, y_min, y_max, h, a, b, f, phi_1, phi_2, phi_3, phi_4):
     xx, yy = np.meshgrid(x_grid, y_grid, sparse=True)
 
     u = np.zeros((N + 1, N + 1))
+    u.fill(np.inf)
 
     u[0] = phi_2(xx)
     u[:, 0] = phi_1(y_grid[None, :])
@@ -35,110 +36,46 @@ def solve(x_min, x_max, y_min, y_max, h, a, b, f, phi_1, phi_2, phi_3, phi_4):
 
     c_0 = 2 * (a + b) / (h * h)
     c_1 = -a / (h * h)
-    c_2 = -b * (h * h)
+    c_2 = -b / (h * h)
 
-    for j in range(2, N - 1):
-        # i = 1
-        row = (j - 1) * (N - 1)
-        Ah[row][(j - 1) * (N - 1)] = c_0
-        Ah[row][(j - 1) * (N - 1) + 1] = c_1
-        Ah[row][(j - 2) * (N - 1)] = c_2
-        Ah[row][j * (N - 1)] = c_2
-
-        b_vec[row] = f(h, j * h) - c_1 * u[j][0]
-
-    for j in range(2, N - 1):
-        # i = N-1
-        row = (j - 1) * (N - 1) + N - 2
-
-        Ah[row][(j - 1) * (N - 1) + N - 3] = c_1
-        Ah[row][(j - 1) * (N - 1) + N - 2] = c_0
-        Ah[row][(j - 2) * (N - 1) + N - 2] = c_2
-        Ah[row][j * (N - 1) + N - 2] = c_2
-
-        b_vec[row] = f((N - 1) * h, j * h) - c_1 * u[j][N]
-
-    for i in range(2, N - 1):
-        # j = 1
-        row = i - 1
-
-        Ah[row][(j - 1) * (N - 1) + i - 2] = c_1
-        Ah[row][(j - 1) * (N - 1) + i - 1] = c_0
-        Ah[row][(j - 1) * (N - 1) + i] = c_1
-        Ah[row][j * (N - 1) + i - 1] = c_2
-
-        b_vec[row] = f(i * h, h) - c_2 * u[0][i]
-
-    for i in range(2, N - 1):
-        # j = N-1
-        row = (N - 2) * (N - 1) + i - 1
-
-        Ah[row][(N - 2) * (N - 1) + i - 2] = c_1
-        Ah[row][(N - 2) * (N - 1) + i - 1] = c_0
-        Ah[row][(N - 2) * (N - 1) + i] = c_1
-        Ah[row][(N - 2) * (N - 1) + i - 1] = c_2
-
-        b_vec[row] = f(i * h, (N - 1) * h) - c_2 * u[N][i]
-
-    # i, j = 1
-    row = 0
-    Ah[row][0] = c_0
-    Ah[row][1] = c_1
-    Ah[row][N - 1] = c_2
-    b_vec[row] = f(h, h) - c_1 * u[1][0] - c_2 * u[0][1]
-
-    # i, j = N-1
-    row = (N - 2) * (N - 1) + N - 2
-    Ah[row][(N - 2) * (N - 1) + N - 3] = c_1
-    Ah[row][(N - 2) * (N - 1) + N - 2] = c_0
-    Ah[row][(N - 3) * (N - 1) + N - 2] = c_2
-    b_vec[row] = f((N - 1) * h, (N - 1) * h) + - c_1 * u[N - 1][N - 2] - c_2 * u[N - 2][N - 1]
-
-    # i = 1, j = N-1
-    row = (N - 2) * (N - 1)
-
-    Ah[row][(N - 2) * (N - 1)] = c_0
-    Ah[row][(N - 2) * (N - 1) + 1] = c_1
-    Ah[row][(N - 3) * (N - 1)] = c_2
-    b_vec[row] = f(h, (N - 1) * h) - c_1 * u[N - 1][0] - c_2 * u[N][1]
-
-    # i = N-1, j = 1
-    row = N - 2
-
-    Ah[row][N - 3] = c_1
-    Ah[row][N - 2] = c_0
-    Ah[row][N - 1 + N - 2] = c_2
-    b_vec[row] = f((N - 1) * h, h) - c_1 * u[1][N] - c_2 * u[0][N - 1]
-
-    for j in range(2, N - 1):
-        for i in range(2, N - 1):
+    for j in range(1, N):
+        for i in range(1, N):
             row = (j - 1) * (N - 1) + i - 1
-
-            Ah[row][(j - 1) * (N - 1) + i - 2] = c_1
             Ah[row][(j - 1) * (N - 1) + i - 1] = c_0
-            Ah[row][(j - 1) * (N - 1) + i] = c_1
-            Ah[row][(j - 2) * (N - 1) + i - 1] = c_2
-            Ah[row][j * (N - 1) + i - 1] = c_2
-            b_vec[row] = f(i * h, j * h)
+
+            if u[j][i - 1] == np.inf:
+                Ah[row][(j - 1) * (N - 1) + i - 2] = c_1
+            else:
+                b_vec[row] -= c_1 * u[j][i - 1]
+
+            if u[j][i + 1] == np.inf:
+                Ah[row][(j - 1) * (N - 1) + i] = c_1
+            else:
+                b_vec[row] -= c_1 * u[j][i + 1]
+
+            if u[j - 1][i] == np.inf:
+                Ah[row][(j - 2) * (N - 1) + i - 1] = c_2
+            else:
+                b_vec[row] -= c_2 * u[j - 1][i]
+
+            if u[j + 1][i] == np.inf:
+                Ah[row][j * (N - 1) + i - 1] = c_2
+            else:
+                b_vec[row] -= c_2 * u[j + 1][i]
+
+            b_vec[row] += f(i * h, j * h)
 
     # def func(x):
-    #     return Ah.dot(np.asarray(x)) - b_vec
+    #     return Ah.dot(x) - b_vec
 
     # u_vec = optimize.fmin_cg(func, np.zeros((N - 1)**2))
 
     # TODO: replace this to gradient descent
     u_vec = linalg.linalg.solve(Ah, b_vec)
 
-    for j in range(1, N - 1):
-        for i in range(1, N - 1):
-            u[j][i] = u_vec[(j - 1)*(N - 1) + i - 1]
-
-    # with ChargingBar('Solving (time layer):', max=M - 1) as bar:
-    #     for n in range(0, M - 1):
-    #         u[n + 1] = np.array(
-    #             [u[n + 1][0]] + [tau * f(x_grid[j], t_grid[n]) + u[n][j] - d * (u[n][j] - u[n][j - 1]) for j in
-    #                              range(1, N)])
-    #         bar.next()
+    for j in range(1, N):
+        for i in range(1, N):
+            u[j][i] = u_vec[(j - 1) * (N - 1) + i - 1]
 
     return u
 
