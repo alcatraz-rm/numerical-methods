@@ -6,6 +6,8 @@ from scipy import optimize
 from numpy import linalg
 from matplotlib import pyplot as plt
 from progress.bar import ChargingBar
+from power_method import power_iteration
+from gradient_descent import descent
 
 from tasks_configs import *
 
@@ -69,9 +71,22 @@ def solve(x_min, x_max, y_min, y_max, h, a, b, f, phi_1, phi_2, phi_3, phi_4):
     #     return Ah.dot(x) - b_vec
 
     # u_vec = optimize.fmin_cg(func, np.zeros((N - 1)**2))
+    # eigvec_max_inv, max_value_inv = power_iteration(np.linalg.inv(Ah), num_simulations=40000)
+    # min_value = 1 / max_value_inv
+    # print(np.linalg.norm(Ah.dot(eigvec_max_inv) - min_value * eigvec_max_inv))
+    # assert np.linalg.norm(np.linalg.norm(Ah.dot(eigvec_max_inv) - min_value * eigvec_max_inv)) < 10 ** (-2)
+    # print(min_value)
+
+    # eigvec_max, max_value = power_iteration(Ah, num_simulations=25000)
+    # print(np.linalg.norm(Ah.dot(eigvec_max) - max_value * eigvec_max))
+    # assert np.linalg.norm(Ah.dot(eigvec_max) - max_value * eigvec_max) < 10 ** (-2)
+    # print(max_value)
 
     # TODO: replace this to gradient descent
     u_vec = linalg.linalg.solve(Ah, b_vec)
+    u_vec_1 = descent(Ah, b_vec)
+
+    print(np.linalg.norm(u_vec - u_vec_1))
 
     for j in range(1, N):
         for i in range(1, N):
