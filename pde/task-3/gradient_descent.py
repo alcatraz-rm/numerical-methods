@@ -1,7 +1,14 @@
+import sys
+
 import numpy as np
+# from progress.bar import ChargingBar, IncrementalBar
+from progress.spinner import MoonSpinner
+import progress
 
 
 def descent(A, b, eps=1e-5):
+    print("Solving Ax=b with gradient descent:")
+
     x_0 = np.array([b[i]/A[i][i] for i in range(len(b))])
     r = b - A.dot(x_0)
 
@@ -14,6 +21,9 @@ def descent(A, b, eps=1e-5):
 
         x += mu * r
         cnt += 1
-        print(cnt, np.linalg.norm(r))
+
+        if cnt % 10 == 0:
+            sys.stdout.write(f"\rIteration: {cnt}, ||r||: {np.linalg.norm(r)}")
+            sys.stdout.flush()
 
     return x
