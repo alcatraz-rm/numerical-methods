@@ -1,9 +1,6 @@
 import sys
 
 import numpy as np
-# from progress.bar import ChargingBar, IncrementalBar
-from progress.spinner import MoonSpinner
-import progress
 
 
 def descent(A, b, eps=1e-5):

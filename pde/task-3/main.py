@@ -69,27 +69,22 @@ def solve(x_min, x_max, y_min, y_max, h, a, b, f, phi_1, phi_2, phi_3, phi_4):
     min_value = 1 / max_value_inv
     print()
     print(np.linalg.norm(Ah.dot(eigvec_max_inv) - min_value * eigvec_max_inv))
-    # assert np.linalg.norm(np.linalg.norm(Ah.dot(eigvec_max_inv) - min_value * eigvec_max_inv)) < 10 ** (-2)
     print(f"min_value: {min_value}\n")
 
     eigvec_max, max_value = power_iteration(Ah, num_simulations=50000)
     print()
     print(np.linalg.norm(Ah.dot(eigvec_max) - max_value * eigvec_max))
-    # assert np.linalg.norm(Ah.dot(eigvec_max) - max_value * eigvec_max) < 10 ** (-2)
     print(f"max_value: {max_value}\n")
 
     eigvals = sorted(np.linalg.eigvals(Ah))
     print(f"min and max eigvals using np.linalg.eigvals: {eigvals[0]} {eigvals[-1]}")
     print()
 
-    # u_vec = linalg.linalg.solve(Ah, b_vec)
-    u_vec_1 = descent(Ah, b_vec)
-
-    # print(np.linalg.norm(u_vec - u_vec_1))
+    u_vec = descent(Ah, b_vec)
 
     for j in range(1, N):
         for i in range(1, N):
-            u[j][i] = u_vec_1[(j - 1) * (N - 1) + i - 1]
+            u[j][i] = u_vec[(j - 1) * (N - 1) + i - 1]
 
     return u
 
