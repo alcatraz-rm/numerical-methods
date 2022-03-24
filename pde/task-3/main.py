@@ -2,7 +2,8 @@ import time
 from datetime import timedelta
 
 import numpy as np
-from numpy import linalg
+from scipy.sparse import diags, linalg
+from scipy import linalg as lg
 from matplotlib import pyplot as plt
 from power_method import power_iteration
 from gradient_descent import descent
@@ -32,55 +33,75 @@ def solve(x_min, x_max, y_min, y_max, h, a, b, f, phi_1, phi_2, phi_3, phi_4):
     u[:, N] = phi_3(y_grid[None, :])
 
     b_vec = np.zeros((N - 1) ** 2)
-    Ah = np.zeros(((N - 1) ** 2, (N - 1) ** 2))
 
     c_0 = 2 * (a + b) / (h * h)
     c_1 = -a / (h * h)
     c_2 = -b / (h * h)
 
+    main_diag = []
+    upper_diag_1 = [0 for _ in range((N - 1) ** 2)]
+    upper_diag_k = []
+    lower_diag_1 = [0 for _ in range((N - 1) ** 2)]
+    lower_diag_k = []
+
+    def append_to_diagonal(val, i, j):
+        if i == j:
+            main_diag.append(val)
+        elif i - 1 == j:
+            upper_diag_1[i - 1] = val
+        elif i + 1 == j:
+            lower_diag_1[i] = val
+        elif i - 1 < j:
+            upper_diag_k.append(val)
+        else:
+            lower_diag_k.append(val)
+
     for j in range(1, N):
         for i in range(1, N):
             row = (j - 1) * (N - 1) + i - 1
-            Ah[row][(j - 1) * (N - 1) + i - 1] = c_0
+            append_to_diagonal(c_0, row, (j - 1) * (N - 1) + i - 1)
 
             if u[j][i - 1] == np.inf:
-                Ah[row][(j - 1) * (N - 1) + i - 2] = c_1
+                append_to_diagonal(c_1, row, (j - 1) * (N - 1) + i - 2)
             else:
                 b_vec[row] -= c_1 * u[j][i - 1]
 
             if u[j][i + 1] == np.inf:
-                Ah[row][(j - 1) * (N - 1) + i] = c_1
+                append_to_diagonal(c_1, row, (j - 1) * (N - 1) + i)
             else:
                 b_vec[row] -= c_1 * u[j][i + 1]
 
             if u[j - 1][i] == np.inf:
-                Ah[row][(j - 2) * (N - 1) + i - 1] = c_2
+                append_to_diagonal(c_2, row, (j - 2) * (N - 1) + i - 1)
             else:
                 b_vec[row] -= c_2 * u[j - 1][i]
 
             if u[j + 1][i] == np.inf:
-                Ah[row][j * (N - 1) + i - 1] = c_2
+                append_to_diagonal(c_2, row, j * (N - 1) + i - 1)
             else:
                 b_vec[row] -= c_2 * u[j + 1][i]
 
             b_vec[row] += f(i * h, j * h)
 
-    eigvec_max_inv, max_value_inv = power_iteration(np.linalg.inv(Ah), num_simulations=50000)
-    min_value = 1 / max_value_inv
-    print()
-    print(np.linalg.norm(Ah.dot(eigvec_max_inv) - min_value * eigvec_max_inv))
-    print(f"min_value: {min_value}\n")
+    k = (N - 1) ** 2 - len(upper_diag_k)
+    A = diags([lower_diag_k, lower_diag_1, main_diag, upper_diag_1, upper_diag_k], [-k, -1, 0, 1, k])
 
-    eigvec_max, max_value = power_iteration(Ah, num_simulations=50000)
+    eigvec_max, max_value = power_iteration(A, num_simulations=100000)
     print()
-    print(np.linalg.norm(Ah.dot(eigvec_max) - max_value * eigvec_max))
     print(f"max_value: {max_value}\n")
 
-    eigvals = sorted(np.linalg.eigvals(Ah))
+    min_value = np.abs(max_value) - \
+                power_iteration(np.abs(max_value) * diags(np.ones((N - 1) ** 2), 0) - A, 100000)[1]
+    print()
+    # print(np.linalg.norm(Ah.dot(eigvec_max_inv) - min_value * eigvec_max_inv))
+    print(f"min_value: {min_value}\n")
+
+    # print(linalg.eigsh(A, k=2, return_eigenvectors=False))
+    eigvals = sorted(lg.eigvalsh(A.toarray()))
     print(f"min and max eigvals using np.linalg.eigvals: {eigvals[0]} {eigvals[-1]}")
     print()
 
-    u_vec = descent(Ah, b_vec)
+    u_vec = descent(A, main_diag, b_vec)
 
     for j in range(1, N):
         for i in range(1, N):
@@ -114,7 +135,6 @@ u_ex = u_exact(xx, yy)
 err = find_max_dev(u, u_ex)
 print()
 print("\nMax error:", err)
-# print(f"tau + h = {tau + h}")
 print("Elapsed time:", timedelta(seconds=end_time - start_time))
 
 # graph logic
