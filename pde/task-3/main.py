@@ -86,20 +86,26 @@ def solve(x_min, x_max, y_min, y_max, h, a, b, f, phi_1, phi_2, phi_3, phi_4):
     k = (N - 1) ** 2 - len(upper_diag_k)
     A = diags([lower_diag_k, lower_diag_1, main_diag, upper_diag_1, upper_diag_k], [-k, -1, 0, 1, k])
 
-    eigvec_max, max_value = power_iteration(A, num_simulations=100000)
-    print()
-    print(f"max_value: {max_value}\n")
+    # eigvec_max, max_value = power_iteration(A, num_simulations=100000)
+    # print()
+    # print(f"max_value: {max_value}\n")
 
-    min_value = np.abs(max_value) - \
-                power_iteration(np.abs(max_value) * diags(np.ones((N - 1) ** 2), 0) - A, 100000)[1]
-    print()
+    # min_value = np.abs(max_value) - \
+    #             power_iteration(np.abs(max_value) * diags(np.ones((N - 1) ** 2), 0) - A, 100000)[1]
+    # norm = np.linalg.norm(A.toarray(), np.inf)
+    # print()
+    # print(norm)
+    # min_value_1 = norm - \
+    #             power_iteration(norm * diags(np.ones((N - 1) ** 2), 0) - A, 100000)[1]
+    # print()
     # print(np.linalg.norm(Ah.dot(eigvec_max_inv) - min_value * eigvec_max_inv))
-    print(f"min_value: {min_value}\n")
+    # print(f"min_value: {min_value}\nmin_value_1: {min_value_1}\n")
 
-    # print(linalg.eigsh(A, k=2, return_eigenvectors=False))
-    eigvals = sorted(lg.eigvalsh(A.toarray()))
-    print(f"min and max eigvals using np.linalg.eigvals: {eigvals[0]} {eigvals[-1]}")
-    print()
+    # print(linalg.eigsh(A, k=1, return_eigenvectors=False))
+    # print(norm - linalg.eigsh(norm * diags(np.ones((N - 1) ** 2), 0) - A, k=1, return_eigenvectors=False))
+    # eigvals = sorted(lg.eigvalsh(A.toarray(), k=1))
+    # print(f"min and max eigvals using np.linalg.eigvals: {eigvals[0]} {eigvals[-1]}")
+    # print()
 
     u_vec = descent(A, main_diag, b_vec)
 
