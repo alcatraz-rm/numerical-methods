@@ -3,9 +3,7 @@ from datetime import timedelta
 
 import numpy as np
 from scipy.sparse import diags, linalg
-from scipy import linalg as lg
 from matplotlib import pyplot as plt
-from power_method import power_iteration
 from gradient_descent import descent
 
 from tasks_configs import *
